@@ -42,9 +42,14 @@
     "webpack-dev-server": "^4.1.1"
   },
   "dependencies": {
+    "axios": "^0.27.2",
     "bootstrap": "^5.2.0",
+    "i18next": "^21.9.0",
+    "lodash": "^4.17.21",
     "npm-check-updates": "^11.8.5",
+    "on-change": "^4.0.1",
     "sass": "^1.39.0",
-    "sass-loader": "^12.1.0"
+    "sass-loader": "^12.1.0",
+    "yup": "^0.32.11"
   }
 }

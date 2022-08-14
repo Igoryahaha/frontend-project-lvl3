@@ -1,3 +1,118 @@
+import onChange from 'on-change';
+import i18next from 'i18next';
+import * as yup from 'yup';
+import resources from './locales/ru.js';
+import {
+  renderMessage,
+} from './view';
+import downloadRss from './rss.js';
+
+const validation = (url, feeds) => {
+  yup.setLocale({
+    mixed: {
+      notOneOf: 'duplicate',
+      required: 'required',
+    },
+    string: {
+      url: 'invalidURL',
+    },
+  });
+
+  const schema = yup.object({
+    url: yup.string().required().url().notOneOf(feeds),
+  });
+
+  return schema.validate(url)
+    .then((data) => data)
+    .catch((e) => e);
+};
+
 export default () => {
-  console.log('Hello world!');
+  const i18nInstance = i18next.createInstance();
+
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    input: document.getElementById('url-input'),
+    button: document.getElementById('btn-submit'),
+
+  };
+
+  i18nInstance
+    .init({
+      lng: 'ru',
+      debug: false,
+      resources,
+    })
+    .then((t) => t);
+
+  const state = {
+    feeds: [],
+    form: {
+      message: '',
+      modalId: '',
+      process: 'filling',
+      messageType: '',
+    },
+  };
+
+  const watchedState = onChange(state, (path, value) => {
+    switch (state.form.process) {
+      case 'filling':
+        elements.input.removeAttribute('readonly');
+        elements.button.disabled = false;
+        break;
+
+      case 'successfully':
+        renderMessage(state.form, elements.form, i18nInstance);
+
+        elements.input.removeAttribute('readonly');
+        elements.button.disabled = false;
+
+        break;
+
+      case 'loading':
+        elements.input.setAttribute('readonly', true);
+        elements.button.disabled = true;
+        break;
+
+      case 'error':
+        renderMessage(state.form, elements.form, i18nInstance);
+        elements.input.removeAttribute('readonly');
+        elements.button.disabled = false;
+        break;
+
+      default:
+        throw new Error(value);
+    }
+  });
+
+  elements.form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const url = { url: formData.get('url') };
+    const feedsUrls = state.feeds.map((feed) => feed.url);
+    console.log(state);
+    validation(url, feedsUrls)
+      .then((data) => {
+        if (data.url) {
+          watchedState.process = 'loading';
+          downloadRss(watchedState, data.url)
+            .then(() => {
+              watchedState.form.message = 'SuccessAdding';
+              watchedState.form.messageType = 'success';
+              watchedState.form.process = 'successfully';
+            })
+            .catch((error) => {
+              watchedState.form.message = error.message;
+              watchedState.form.messageType = 'error';
+              watchedState.form.process = 'error';
+            });
+        } else {
+          watchedState.form.message = data.message;
+          watchedState.form.messageType = 'error';
+          watchedState.form.process = 'error';
+        }
+      });
+  });
 };
