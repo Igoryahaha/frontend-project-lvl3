@@ -10,7 +10,11 @@ export default {
         required: 'Не должно быть пустым',
         'Network Error': 'Ошибка сети',
       },
-
+      buttons: {
+        view: 'Просмотр',
+      },
+      feeds: 'Фиды',
+      posts: 'Посты',
     },
   },
 };

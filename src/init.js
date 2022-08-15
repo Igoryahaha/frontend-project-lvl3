@@ -4,6 +4,8 @@ import * as yup from 'yup';
 import resources from './locales/ru.js';
 import {
   renderMessage,
+  renderFeeds,
+  renderPosts,
 } from './view';
 import downloadRss from './rss.js';
 
@@ -34,7 +36,8 @@ export default () => {
     form: document.querySelector('.rss-form'),
     input: document.getElementById('url-input'),
     button: document.getElementById('btn-submit'),
-
+    posts: document.querySelector('.posts'),
+    feeds: document.querySelector('.feeds'),
   };
 
   i18nInstance
@@ -47,6 +50,7 @@ export default () => {
 
   const state = {
     feeds: [],
+    posts: [],
     form: {
       message: '',
       modalId: '',
@@ -67,7 +71,8 @@ export default () => {
 
         elements.input.removeAttribute('readonly');
         elements.button.disabled = false;
-
+        renderFeeds(state.feeds, elements, i18nInstance);
+        renderPosts(state.posts, elements, i18nInstance);
         break;
 
       case 'loading':
