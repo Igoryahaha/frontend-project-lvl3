@@ -7,7 +7,9 @@ import {
   renderFeeds,
   renderPosts,
 } from './view';
-import downloadRss from './rss.js';
+import { getRss, updateRss } from './rss.js';
+
+const updateTimeout = 5000;
 
 const validation = (url, feeds) => {
   yup.setLocale({
@@ -91,6 +93,14 @@ export default () => {
     }
   });
 
+  const autoUpdateRss = () => updateRss(watchedState)
+    .then(() => {
+      setTimeout(autoUpdateRss, updateTimeout);
+    })
+    .catch((e) => console.log('Update RSS error!', e));
+
+  autoUpdateRss();
+
   elements.form.addEventListener('submit', (event) => {
     event.preventDefault();
 
@@ -102,7 +112,7 @@ export default () => {
       .then((data) => {
         if (data.url) {
           watchedState.process = 'loading';
-          downloadRss(watchedState, data.url)
+          getRss(watchedState, data.url)
             .then(() => {
               watchedState.form.message = 'SuccessAdding';
               watchedState.form.messageType = 'success';
