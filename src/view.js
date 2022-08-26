@@ -111,4 +111,28 @@ const renderPosts = (posts, elements, i18nInstance) => {
   container.append(postList);
 };
 
-export { renderMessage, renderPosts, renderFeeds };
+const renderModal = (inboxId, posts) => {
+  const modalPost = posts.filter(({ id }) => id === inboxId)[0];
+  const modal = document.querySelector('#modal');
+
+  const modalTitle = modal.querySelector('.modal-title');
+  modalTitle.textContent = modalPost.title;
+
+  const modalBody = modal.querySelector('.modal-body');
+  modalBody.textContent = modalPost.description;
+
+  const articleLinkButton = modal.querySelector('.full-article');
+  articleLinkButton.setAttribute('href', modalPost.link);
+};
+
+const markRead = (postIds) => {
+  postIds.forEach((postId) => {
+    const link = document.querySelector(`a[data-id="${postId}"]`);
+    link.classList.remove('fw-bold');
+    link.classList.add('fw-normal', 'link-secondary');
+  });
+};
+
+export {
+  renderMessage, renderPosts, renderFeeds, renderModal, markRead,
+};

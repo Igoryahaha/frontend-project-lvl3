@@ -6,6 +6,8 @@ import {
   renderMessage,
   renderFeeds,
   renderPosts,
+  renderModal,
+  markRead,
 } from './view';
 import { getRss, updateRss } from './rss.js';
 
@@ -53,6 +55,7 @@ export default () => {
   const state = {
     feeds: [],
     posts: [],
+    readedPosts: [],
     form: {
       message: '',
       modalId: '',
@@ -60,6 +63,14 @@ export default () => {
       messageType: '',
     },
   };
+
+  const addModalEvents = (watchedState) => Array
+    .from(document.querySelectorAll('button[data-bs-toggle="modal"]'))
+    .map((btn) => btn.addEventListener('click', () => {
+      watchedState.form.modalId = btn.dataset.id;
+      watchedState.readedPosts.push(btn.dataset.id);
+      watchedState.form.process = 'modal';
+    }));
 
   const watchedState = onChange(state, (path, value) => {
     switch (state.form.process) {
@@ -75,6 +86,7 @@ export default () => {
         elements.button.disabled = false;
         renderFeeds(state.feeds, elements, i18nInstance);
         renderPosts(state.posts, elements, i18nInstance);
+        addModalEvents(watchedState);
         break;
 
       case 'loading':
@@ -86,6 +98,16 @@ export default () => {
         renderMessage(state.form, elements.form, i18nInstance);
         elements.input.removeAttribute('readonly');
         elements.button.disabled = false;
+        break;
+
+      case 'updated':
+        renderPosts(state.posts, elements, i18nInstance);
+        addModalEvents(watchedState);
+        break;
+
+      case 'modal':
+        renderModal(state.form.modalId, state.posts);
+        markRead(state.readedPosts);
         break;
 
       default:
