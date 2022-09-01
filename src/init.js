@@ -129,7 +129,7 @@ export default () => {
     const formData = new FormData(event.currentTarget);
     const url = { url: formData.get('url') };
     const feedsUrls = state.feeds.map((feed) => feed.url);
-    console.log(state);
+
     validation(url, feedsUrls)
       .then((data) => {
         if (data.url) {
